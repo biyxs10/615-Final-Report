@@ -1,0 +1,279 @@
+---
+title: "615 Final Presentation"
+author: "Xiaohan Shi"
+format: pptx
+editor: visual
+---
+
+# General Description
+
+-   Palau is located in the Micronesia region of the Western Pacific Ocean. 
+
+-   The total area of Palau is about 459 square kilometers (about 177 square miles), which makes it one of the smallest countries in the world. 
+
+# Key Facts of Palau
+
+-   Government
+
+Palau is a constitutional presidential republic with a bicameral legislature, the Olbiil Era Kelulau, and an independent judiciary. Its capital is Engelmade. 
+
+-   Economy
+
+Palau's economy relies on tourism, subsistence agriculture, and fishing. 
+
+-   Nature Environment
+
+For a tiny archipelago with only a 328.14 square km landmass, Palau has an intriguing biodiversity of its own (Home - Pristine, n.d.). 
+
+Around 75% of Palau's volcanic, coral atoll, and limestone islands are covered in native forests and mangroves. These forests, the most biodiverse in Micronesia, host over 1,400 plant species, including 194 endemic varieties such as 23 unique orchid species.
+
+# Key Facts of Palau
+
+-   Culture
+
+Matrilineal: The matrilineal traditions of Palauan culture deeply influence the social structure. 
+
+Respect for Nature: Traditional beliefs emphasize the harmonious coexistence of man and nature, a concept that is not only reflected in ancient practices, but is also compatible with modern concepts of environmental protection.
+
+Oral Tradition: Through the telling of myths, legends and historical stories, Palauans maintain their cultural memory and transmit the values and identity of their communities.
+
+Traditional Navigation: As a maritime people, Palauans are known for their excellent traditional navigation skills. They navigate the vast Pacific Ocean using the stars, winds, and nature to guide them, and this seafaring tradition, which is closely tied to the sea, is embedded in their cultural DNA.
+
+-   Climate
+
+Palau has a tropical rainforest climate with an average annual temperature of about 28°C. Rainfall is abundant throughout the year, with 3,800 millimeters per year. The average humidity is 82% and although rainfall is more frequent from June to October, sunshine is still abundant.
+
+# Key Demographics
+
+```{r}
+library(ggplot2)
+library(WDI)
+# indicate country and data
+indicators <- c(
+  "SP.POP.TOTL",       # Population
+  "NY.GDP.MKTP.CD",    # GDP ($)
+  "ST.INT.ARVL"        # International Tourist Arrivals
+)
+# Palau ID
+country <- "PLW"
+
+palau_data <- WDI(country = country, indicator = indicators, start = 2010, end = 2023)
+
+# rename column
+colnames(palau_data) <- c("country","iso2c","iso3c","year","Population","GDP","Visitors")
+
+# transfer gdp into million
+palau_data$GDP <- palau_data$GDP / 1e6
+```
+
+```{r}
+#Monthly Precipitation, 2012 - 2021
+rain<-read.csv("Precipitation_Palau.csv")
+
+#Monthly Average Temperatures, 2012 - 2021  (Degrees Fahrenheit)
+temp<-read.csv("temperature.csv")
+```
+
+```{r}
+library(scales)
+# 1. GDP 
+gdp_plot <- ggplot(palau_data, aes(x = year, y = GDP)) +
+  geom_line(color = "tan1", size = 1) +
+  geom_point(color = "indianred1", size = 2) +
+  scale_x_continuous(breaks = seq(min(palau_data$year), max(palau_data$year), by = 1)) +
+  geom_text(aes(label = paste0(round(GDP, 1), "M")), vjust = -1.5, size = 3) +
+  labs(title = "GDP (in millions_$)", x = "Year", y = "GDP (in millions_$)") +
+  theme_minimal()
+
+# 2. Population 
+population_plot <- ggplot(palau_data, aes(x = year, y = Population)) +
+  geom_line(color = "aquamarine2", size = 1) +
+  geom_point(color = "aquamarine4", size = 2) +
+  geom_text(aes(label = Population), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(palau_data$year), max(palau_data$year), by = 1)) +
+  labs(title = "Population (2013-2023)", x = "Year", y = "Population") +
+  theme_minimal()
+
+# 3. Visitors 
+visitors_plot <- ggplot(palau_data, aes(x = year, y = Visitors)) +
+  geom_line(color = "purple", size = 1) +
+  geom_point(color = "blueviolet", size = 2) +
+  geom_text(aes(label = Visitors), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(palau_data$year), max(palau_data$year), by = 1)) +
+  labs(title = "Number of International Visitors", x = "Year", y = "International Visitors") +
+  theme_minimal()
+
+# 4. Precipitation 
+prep_plot <- ggplot(rain, aes(x = Year, y = Average)) +
+  geom_bar(stat = "identity", fill = "cornflowerblue", color = "black", alpha = 0.7) +
+  geom_text(aes(label = Average), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(rain$Year), max(rain$Year), by = 1)) +
+  labs(title = "Average Precipitation", x = "Year", y = "Precipitation (inches)") +
+  theme_minimal()
+
+# 5. Temperature 
+temp_plot <- ggplot(temp, aes(x = Year, y = Average)) +
+  geom_bar(stat = "identity", fill = "orange", color = "black",alpha=0.7) +
+  geom_text(aes(label = Average), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(temp$Year), max(temp$Year), by = 1)) +
+  labs(title = "Average Temperature (°F)", x = "Year", y = "Temperature(°F)") +
+  theme_minimal()
+
+print(gdp_plot)
+print(population_plot)
+print(visitors_plot)
+print(prep_plot)
+print(temp_plot)
+```
+
+# Comparative Analysis
+
+```{r}
+library(dplyr)
+library(tidyr)
+# Fiji Data
+fiji_data <- WDI(
+  country = "FJ",
+  indicator = c(
+    "NY.GDP.MKTP.CD",  # GDP
+    "SP.POP.TOTL",     # Population
+    "ST.INT.ARVL"      # Visitors
+  ),
+  start = 2012,
+  end = 2023
+)
+
+
+#rename column names
+colnames(fiji_data) <- c("country","iso2c","iso3c","year","GDP","Population","Visitors")
+
+# transfer gdp into million
+fiji_data$GDP <- fiji_data$GDP / 1e6
+
+# merge
+compare_data <- bind_rows(palau_data, fiji_data)
+```
+
+```{r}
+#GDP
+fiji_gdp <- ggplot(fiji_data, aes(x = year, y = GDP)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "indianred1", size = 2) +
+  scale_x_continuous(breaks = seq(min(fiji_data$year), max(fiji_data$year), by = 1)) +
+  geom_text(aes(label = paste0(round(GDP, 1), "M")), vjust = -1.5, size = 3) +
+  labs(title = "GDP of Fiji(in millions_$)", x = "Year", y = "GDP (in millions_$)") +
+  theme_minimal()
+fiji_gdp
+
+# Population 
+fiji_population <- ggplot(fiji_data, aes(x = year, y = Population)) +
+  geom_line(color = "aquamarine2", size = 1) +
+  geom_point(color = "green", size = 2) +
+  geom_text(aes(label = Population), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(fiji_data$year), max(fiji_data$year), by = 1)) +
+  labs(title = "Population of Fiji", x = "Year", y = "Population") +
+  theme_minimal()
+fiji_population
+
+# Visitors
+fiji_visitors <- ggplot(fiji_data, aes(x = year, y = Visitors)) +
+  geom_line(color = "purple", size = 1) +
+  geom_point(color = "tan1", size = 2) +
+  geom_text(aes(label = Visitors), vjust = -0.5, color = "grey60", size = 3.5) +
+  scale_x_continuous(breaks = seq(min(fiji_data$year), max(fiji_data$year), by = 1)) +
+  labs(title = "Number of International Visitors in Fiji", x = "Year", y = "International Visitors") +
+  theme_minimal()
+fiji_visitors
+```
+
+# Comparative Analysis
+
+### Fiji
+
+Why choose Fiji:
+
+Fiji's geographic proximity to Palau, similar reliance on tourism, and shared environmental and economic challenges. Additionally, both countries are known for their marine biodiversity.
+
+# Comparative Analysis
+
+```{r}
+# Comparative Plots
+comp_gdp<-ggplot(compare_data, aes(x = year, y = GDP, color = country, linetype = country)) +
+  geom_line(size = 1.2) +
+  scale_color_manual(values = c("Fiji" = "blue", "Palau" = "lightblue")) +
+  scale_linetype_manual(values = c("Fiji" = "solid", "Palau" = "dashed")) +
+  scale_x_continuous(breaks = seq(min(compare_data$year), max(compare_data$year), by = 1)) +
+  labs(title = "GDP Comparison: Fiji vs. Palau",
+       x = "Year", y = "GDP (million_$)",
+       color = "Country", linetype = "Country") +
+  theme_minimal()
+
+comp_population<-ggplot(compare_data, aes(x = year, y = Population, color = country, linetype = country)) +
+  geom_line(size = 1.2) +
+  scale_color_manual(values = c("Fiji" = "green", "Palau" = "lightgreen")) +
+  scale_linetype_manual(values = c("Fiji" = "solid", "Palau" = "dashed")) +
+  scale_x_continuous(breaks = seq(min(compare_data$year), max(compare_data$year), by = 1)) +
+  labs(title = "Population Comparison: Fiji vs. Palau (2012-2023)",
+       x = "Year", y = "Population",
+       color = "Country", linetype = "Country") +
+  theme_minimal()
+
+comp_visitors<-ggplot(compare_data, aes(x = year, y = Visitors, color = country, linetype = country)) +
+  geom_line(size = 1.2) +
+  scale_color_manual(values = c("Fiji" = "purple", "Palau" = "plum")) +
+  scale_linetype_manual(values = c("Fiji" = "solid", "Palau" = "dashed")) +
+  scale_x_continuous(breaks = seq(min(compare_data$year), max(compare_data$year), by = 1)) +
+  labs(title = "Visitors Comparison: Fiji vs. Palau (2012-2023)",
+       x = "Year", y = "Number of Visitors",
+       color = "Country", linetype = "Country") +
+  theme_minimal()
+comp_gdp
+comp_population
+comp_visitors
+```
+
+# SWOT Analysis
+
+1.  Strengths
+
+    Unique natural environment: Palau offers unrivalled pristine natural beauty, as well as world-class diving and snorkeling sites such as the German Channel and wreck sites.
+
+    Conservation pioneers: Palau has demonstrated leadership in environmental protection by pioneering Marine protected areas around the world, such as the Palau National Marine Sanctuary.
+
+2.  Weaknesses
+
+    Land and resource constraints: Palau is small in size, lacks exploitable resources, and receives fewer tourists than other popular islands such as Fiji.
+
+    Economy highly dependent on tourism: other industries such as agriculture and fishing are small, limiting the potential for economic diversification.
+
+# SWOT Analysis
+
+3.  Opportunities
+
+    Special-interest tourism market: pristine natural environments and location can attract tourists who are ecologically friendly and want to be away from crowd.
+
+    Unique culture: Palau is rich in traditional culture, such as local handicrafts, traditional villages and legends, which can serve as an important resource for attracting tourists.
+
+    International cooperation and investment
+
+4.  Threats
+
+    Climate change: Palau‘s special Unique geographical features makes it vulnerable to weather hazards caused by climate change, such as extreme high tides, coastal erosion and seal-level rise.
+
+    Global economic fluctuations: As Palau is a highly tourism-dependent economy, a global economic downturn or crisis can directly affect visitor numbers and revenues. The impact of the global pandemic on Palau's tourism and GDP in 2019-2021 is one example.
+
+# References
+
+About Palau - Office of the Special Prosecutor \| Republic of Palau. (2019, June 3). Office of the Special Prosecutor \| Republic of Palau. <https://www.palauosp.org/about-palau/>
+
+Climate Statistics – PalauGov.pw. (n.d.). PalauGov.pw. <https://www.palaugov.pw/executive-branch/ministries/finance/budgetandplanning/climate-statistics/>
+
+Home - Pristine. (n.d.). <https://pristineparadisepalau.com/>
+
+Palau \| Culture, History, & People. (2019). In Encyclopædia Britannica. <https://www.britannica.com/place/Palau>
+
+Wikipedia Contributors. (2024, November 21). Palau. Wikipedia; Wikimedia Foundation. <https://en.wikipedia.org/wiki/Palau>
+
+World Bank Climate Change Knowledge Portal. (n.d.). Climateknowledgeportal.worldbank.org. <https://climateknowledgeportal.worldbank.org/country/palau/vulnerability>
+
+World Bank. (2024). World Development Indicators. R package WDI. Retrieved from <https://data.worldbank.org>
